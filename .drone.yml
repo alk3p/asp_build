@@ -1,0 +1,25 @@
+---
+kind: pipeline
+name: Desktop Kernel
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: build
+    image: debian:buster
+    commands:
+      - echo "\ndeb-src http://deb.debian.org/debian buster main contrib non-free" >> /etc/apt/sources.list && apt update
+      - apt install -y build-essential curl fakeroot git libncurses-dev liblz4-dev lz4
+      - apt build-dep -y linux
+      - git clone https://github.com/alk3p/x86_kernel.git --depth 1
+      - cd x86_kernel && echo "-aurora1" > localversion
+      - make debian_defconfig && KDEB_CHANGELOG_DIST=buster make deb-pkg -j$(nproc --all)
+      - cd .. && curl -sL https://git.io/file-transfer | sh
+      - find . -name "*.deb" | xargs -exec tar -cvf desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
+      - md5sum desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
+      - ./transfer wet desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
