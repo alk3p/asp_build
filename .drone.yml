@@ -11,10 +11,10 @@ clone:
 
 steps:
   - name: build
-    image: debian:buster
+    image: debian:sid
     commands:
-      - echo "\ndeb-src http://deb.debian.org/debian buster main contrib non-free" >> /etc/apt/sources.list && apt update
-      - apt install -y build-essential curl fakeroot git libncurses-dev liblz4-dev lz4
+      - echo "\ndeb-src http://deb.debian.org/debian sid main contrib non-free" >> /etc/apt/sources.list && apt update
+      - apt install -y build-essential curl fakeroot git libncurses-dev liblz4-dev lz4 gcc-10
       - apt build-dep -y linux
       - git clone https://github.com/alk3p/x86_kernel.git --depth 1
       - cd x86_kernel && echo "-aurora1" > localversion
