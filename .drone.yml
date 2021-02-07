@@ -1,0 +1,24 @@
+---
+kind: pipeline
+name: Laptop Kernel
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: build
+    image: archlinux:base-devel
+    commands:
+      - pacman -Sy asp curl --noconfirm
+      - useradd buildbot -m && passwd -d buildbot
+      - printf 'buildbot ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+      - chgrp buildbot -R /drone/src && chmod g+ws -R /drone/src && setfacl -m u::rwx,g::rwx /drone/src && setfacl -d --set u::rwx,g::rwx,o::- /drone/src
+      - sudo -u buildbot sh -c 'makepkg -s --noconfirm'
+      - curl -sL https://git.io/file-transfer | sh
+      - find . -name "*.pkg.*" | xargs -exec tar -cvf laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
+      - md5sum laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
+      - ./transfer wet laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
