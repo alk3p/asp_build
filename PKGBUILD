@@ -1,11 +1,11 @@
-# Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+# Maintainer: alk3pInjection <webmaster@raspii.tech>
+# Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
-pkgbase=linux
-pkgver=5.10.13.arch1
-pkgrel=2
+pkgbase=linux-aurora
+pkgver=5.10.13.aurora1
+pkgrel=1
 pkgdesc='Linux'
-_srctag=v${pkgver%.*}-${pkgver##*.}
-url="https://git.archlinux.org/linux.git/log/?h=$_srctag"
+url="https://github.com/alk3p/x86_kernel.git"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -16,16 +16,13 @@ makedepends=(
 options=('!strip')
 _srcname=archlinux-linux
 source=(
-  "$_srcname::git+https://git.archlinux.org/linux.git?signed#tag=$_srctag"
-  config         # the main kernel config file
+  "$_srcname::git+https://github.com/alk3p/x86_kernel.git"
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
-  'A2FF3A36AAA56654109064AB19802F8B0D70FC30'  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('SKIP'
-            '47a5c0cbe4f75e77fe64953b516a6a9f277c1dfb812e31edf5cb25feb1b3819a')
+sha256sums=('SKIP')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase
@@ -49,8 +46,7 @@ prepare() {
   done
 
   echo "Setting config..."
-  cp ../config .config
-  make olddefconfig
+  make archlinux_defconfig
 
   make -s kernelrelease > version
   echo "Prepared $pkgbase version $(<version)"
@@ -58,8 +54,7 @@ prepare() {
 
 build() {
   cd $_srcname
-  make all
-  make htmldocs
+  make all -j$(nproc --all)
 }
 
 _package() {
@@ -68,7 +63,7 @@ _package() {
   optdepends=('crda: to set the correct wireless channels of your country'
               'linux-firmware: firmware images needed for some devices')
   provides=(VIRTUALBOX-GUEST-MODULES WIREGUARD-MODULE)
-  replaces=(virtualbox-guest-modules-arch wireguard-arch)
+  replaces=()
 
   cd $_srcname
   local kernver="$(<version)"
@@ -167,26 +162,7 @@ _package-headers() {
   ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
 }
 
-_package-docs() {
-  pkgdesc="Documentation for the $pkgdesc kernel"
-
-  cd $_srcname
-  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
-
-  echo "Installing documentation..."
-  local src dst
-  while read -rd '' src; do
-    dst="${src#Documentation/}"
-    dst="$builddir/Documentation/${dst#output/}"
-    install -Dm644 "$src" "$dst"
-  done < <(find Documentation -name '.*' -prune -o ! -type d -print0)
-
-  echo "Adding symlink..."
-  mkdir -p "$pkgdir/usr/share/doc"
-  ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
-}
-
-pkgname=("$pkgbase" "$pkgbase-headers" "$pkgbase-docs")
+pkgname=("$pkgbase" "$pkgbase-headers")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")
