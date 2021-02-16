@@ -2,7 +2,7 @@
 # Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-aurora
-pkgver=5.10.13.aurora1
+pkgver=5.10.16.aurora1
 pkgrel=1
 pkgdesc='Linux'
 url="https://github.com/alk3p/x86_kernel.git"
