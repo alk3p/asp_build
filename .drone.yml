@@ -12,13 +12,16 @@ clone:
 steps:
   - name: build
     image: archlinux:base-devel
+    environment:
+      patched_glibc: glibc-linux4-2.33-5-x86_64.pkg.tar.zst
     commands:
-      - pacman -Sy asp curl --noconfirm
+      - curl -LO "https://repo.archlinuxcn.org/x86_64/$patched_glibc" && bsdtar -C / -xvf "$patched_glibc"
+      - pacman -Sy asp --noconfirm
       - useradd buildbot -m && passwd -d buildbot
       - printf 'buildbot ALL=(ALL) ALL\n' | tee -a /etc/sudoers
       - chgrp buildbot -R /drone/src && chmod g+ws -R /drone/src && setfacl -m u::rwx,g::rwx /drone/src && setfacl -d --set u::rwx,g::rwx,o::- /drone/src
       - sudo -u buildbot sh -c 'makepkg -s --noconfirm'
-      - curl -sL https://git.io/file-transfer | sh
+      - curl -sL https://git.io/file-transfer | bash -s beta
       - find . -name "*.pkg.*" | xargs -exec tar -cvf laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
       - md5sum laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
       - ./transfer wet laptop-kernel_$(date +%F | sed s@-@@g).tar.gz
