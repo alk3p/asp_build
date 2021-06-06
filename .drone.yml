@@ -19,7 +19,7 @@ steps:
       - git clone https://github.com/alk3p/x86_kernel.git --depth 1
       - cd x86_kernel && echo "-aurora1" > localversion
       - make debian_defconfig && KDEB_CHANGELOG_DIST=buster make deb-pkg -j$(nproc --all)
-      - cd .. && curl -sL https://git.io/file-transfer | sh
+      - cd .. && curl -sL https://git.io/file-transfer | bash -s beta
       - find . -name "*.deb" | xargs -exec tar -cvf desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
       - md5sum desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
       - ./transfer wet desktop-kernel_$(date +%F | sed s@-@@g).tar.gz
