@@ -12,6 +12,9 @@ clone:
 steps:
   - name: build
     image: debian:sid
+    environment:
+      KBUILD_BUILD_USER: misaka
+      KBUILD_BUILD_HOST: tp-workstation
     commands:
       - echo "\ndeb-src http://deb.debian.org/debian sid main contrib non-free" >> /etc/apt/sources.list && apt update
       - apt install -y build-essential curl fakeroot git libncurses-dev liblz4-dev lz4 gcc-10
