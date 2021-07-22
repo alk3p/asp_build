@@ -3,7 +3,7 @@
 
 pkgbase=linux-aurora
 pkgver=5.10.45.aurora1
-pkgrel=1
+pkgrel=2
 pkgdesc='Linux'
 url="https://github.com/alk3p/x86_kernel.git"
 arch=(x86_64)
